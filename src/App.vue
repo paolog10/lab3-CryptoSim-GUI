@@ -25,6 +25,21 @@ html {
 
 body {
     margin: 0;
-    background-color: rgb(242, 242, 242);
 }
+
+#app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #eee;
+    flex: 1;
+}
+
 </style>
