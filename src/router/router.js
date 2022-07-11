@@ -6,6 +6,8 @@ import Tradear from '../views/Tradear.vue'
 import Movimientos from '../views/Movimientos.vue'
 import Cartera from '../views/Cartera.vue'
 import Resultados from '../views/Resultados.vue'
+import RutaNoEncontrada from '../views/RutaNoEncontrada.vue'
+
 const redireccionarNoAutenticados = () => {
     if (useUserStore().username === null) {
         return {name: 'Home'}
@@ -62,6 +64,10 @@ const routes = [
         component: Resultados,
         beforeEnter: [redireccionarNoAutenticados]
     },
+    {
+        path: '/:pathMatch(.*)*',
+        component: RutaNoEncontrada,
+    }
 ]
 
 const router = createRouter({
