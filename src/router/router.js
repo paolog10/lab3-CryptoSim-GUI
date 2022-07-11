@@ -25,6 +25,13 @@ const routes = [
             }
         }
     },
+    {
+        path: "/logout",
+        name: "Logout",
+        beforeEnter: () => {
+            useUserStore().logout()
+            return {name: 'Home'}
+        }
     },
     {
         path: "/tradear",
