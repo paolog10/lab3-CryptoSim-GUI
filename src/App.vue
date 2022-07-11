@@ -19,6 +19,8 @@ export default {
 </template>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
+
 html {
     font-size: 16px;
 }

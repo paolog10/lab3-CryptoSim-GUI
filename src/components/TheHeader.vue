@@ -32,7 +32,6 @@ export default {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Vollkorn+SC:wght@700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap');
 
 header {
     background-color: #181818;
@@ -48,6 +47,7 @@ nav {
     justify-content: space-between;
     align-items: center;
     font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
 }
 
 .navlink {
