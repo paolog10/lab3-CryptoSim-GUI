@@ -2,11 +2,17 @@ import { defineStore } from 'pinia'
 
 export const useUserStore = defineStore('user', {
     state: () => ({
-        username: null,
+        // Defaultea a 'null' si no hay sesión abierta
+        username: localStorage.getItem('username')
     }),
+
     actions: {
-        login(inputUsername) {
-            this.username = inputUsername
+        login(username, mantenerSesionAbierta) {
+            this.username = username
+
+            if (mantenerSesionAbierta) {
+                localStorage.setItem('username', username)
+            }
         },
 
         logout() {
