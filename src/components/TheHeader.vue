@@ -1,14 +1,10 @@
 <script>
-import { mapState } from 'pinia'
-import { useUserStore } from '../stores/userStore'
+import { mapState } from "pinia"
+import { useUserStore } from "../stores/userStore"
 
 export default {
     computed: {
-        ...mapState(useUserStore, ['username']),
-
-        textoLinkLogin() {
-            return this.username ? "Cerrar sesión" : "Iniciar sesión"
-        },
+        ...mapState(useUserStore, ["username"]),
     },
 }
 </script>
@@ -18,14 +14,18 @@ export default {
     <nav>
         <router-link class="navlink logo" :to="{name: 'Home'}">TimbaSim</router-link>
 
-        <div class="app-tools" v-if="username">
-            <router-link class="navlink toollink" :to="{name: 'Tradear'}" active-class="tool-active">Tradear</router-link>
-            <router-link class="navlink toollink" :to="{name: 'Movimientos'}" active-class="tool-active">Movimientos</router-link>
-            <router-link class="navlink toollink" :to="{name: 'Cartera'}" active-class="tool-active">Cartera</router-link>
-            <router-link class="navlink toollink" :to="{name: 'Resultados'}" active-class="tool-active">Resultados</router-link>
-        </div>
+        <template v-if="username">
+            <div class="app-tools">
+                <router-link class="navlink toollink" :to="{name: 'Tradear'}" active-class="tool-active">Tradear</router-link>
+                <router-link class="navlink toollink" :to="{name: 'Movimientos'}" active-class="tool-active">Movimientos</router-link>
+                <router-link class="navlink toollink" :to="{name: 'Cartera'}" active-class="tool-active">Cartera</router-link>
+                <router-link class="navlink toollink" :to="{name: 'Resultados'}" active-class="tool-active">Resultados</router-link>
+            </div>
 
-        <router-link class="navlink" :to="{name: 'Login'}">{{ textoLinkLogin }}</router-link>
+            <router-link class="navlink" :to="{name: 'Logout'}">Cerrar sesión</router-link>
+        </template>
+
+        <router-link v-else class="navlink" :to="{name: 'Login'}">Iniciar sesión</router-link>
     </nav>
 </header>
 </template>
