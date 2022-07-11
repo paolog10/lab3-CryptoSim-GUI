@@ -6,6 +6,11 @@ import Tradear from '../views/Tradear.vue'
 import Movimientos from '../views/Movimientos.vue'
 import Cartera from '../views/Cartera.vue'
 import Resultados from '../views/Resultados.vue'
+const redireccionarNoAutenticados = () => {
+    if (useUserStore().username === null) {
+        return {name: 'Home'}
+    }
+}
 
 const routes = [
     {
@@ -37,21 +42,25 @@ const routes = [
         path: "/tradear",
         name: "Tradear",
         component: Tradear,
+        beforeEnter: [redireccionarNoAutenticados]
     },
     {
         path: "/movimientos",
         name: "Movimientos",
         component: Movimientos,
+        beforeEnter: [redireccionarNoAutenticados]
     },
     {
         path: "/cartera",
         name: "Cartera",
         component: Cartera,
+        beforeEnter: [redireccionarNoAutenticados]
     },
     {
         path: "/resultados",
         name: "Resultados",
         component: Resultados,
+        beforeEnter: [redireccionarNoAutenticados]
     },
 ]
 
