@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '../stores/userStore'
 import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
 import Tradear from '../views/Tradear.vue'
@@ -16,6 +17,14 @@ const routes = [
         path: "/login",
         name: "Login",
         component: Login,
+
+        // Ruta Login no debe ser accedida si ya hay una sesión iniciada
+        beforeEnter: () => {
+            if (useUserStore().username !== null) {
+                return {name: 'Home'}
+            }
+        }
+    },
     },
     {
         path: "/tradear",
