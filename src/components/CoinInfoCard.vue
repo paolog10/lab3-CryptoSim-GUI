@@ -1,0 +1,114 @@
+<script>
+import { mapState, mapActions } from "pinia"
+import { useCoinDataStore } from "../stores/coinDataStore"
+import { obtenerMontoFormateado } from "../helpers/formateoMonto"
+
+export default {
+    data() {
+        return {
+            monedaSeleccionada: "btc",
+        }
+    },
+
+    computed: {
+        ...mapState(useCoinDataStore, ["cotizaciones", "exchanges", "monedasAceptadas"]),
+    },
+
+    methods: {
+        ...mapActions(useCoinDataStore, ["actualizarCotizaciones"]),
+        obtenerMontoFormateado,
+    },
+
+    mounted() {
+        this.actualizarCotizaciones()
+    },
+}
+</script>
+
+<template>
+<div class="coin-info-card">
+    <table>
+        <thead>
+            <tr>
+                <th colspan="3">
+                    <label>
+                        <select name="coins" v-model="monedaSeleccionada">
+                            <option value="btc">BTC</option>
+                            <option value="eth">ETH</option>
+                            <option value="dai">DAI</option>
+                        </select>
+                    </label>
+                </th>
+            </tr>
+            <tr>
+                <th>
+                    EXCHANGE
+                </th>
+                <th>
+                    COMPRA
+                </th>
+                <th>
+                    VENTA
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="(meta, exchange) in exchanges" v-if="cotizaciones['btc']">
+                <td>
+                    <a 
+                        :href="meta.sitioWeb"
+                        target="_blank"
+                    >
+                        {{ meta.nombreMostrado }}
+                    </a>
+                </td>
+                <td>{{ obtenerMontoFormateado(cotizaciones[monedaSeleccionada][exchange].totalAsk) }}</td>
+                <td>{{ obtenerMontoFormateado(cotizaciones[monedaSeleccionada][exchange].totalBid) }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</template>
+
+<style scoped>
+.coin-info-card {
+    background-color: whitesmoke;
+    border: 4px solid #FF9C33;
+    border-radius: 0.6rem;
+}
+
+table {
+    table-layout: fixed;
+    border-collapse: collapse;
+    text-align: center;
+    font-family: 'Montserrat';
+    font-size: 1.2rem;
+    width: 33rem;
+}
+
+th, td {
+    border-bottom: 1px solid #333;
+    padding: 0.5rem 2rem;
+}
+
+tr:last-child td {
+    border: unset;
+}
+
+select {
+    font: inherit;
+    background-color: inherit;
+    border: none;
+    outline: none;
+    cursor: pointer;
+}
+
+a {
+    color: #222;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+</style>
