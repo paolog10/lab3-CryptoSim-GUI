@@ -46,16 +46,13 @@ export default {
 .home-view {
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
     align-items: center;
-    flex: 0.5;
+    flex: 1;
     font-family: 'Montserrat', sans-serif;
 }
 
 .home-intro {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    margin: 5rem 0;
 }
 
 .home-intro-descripcion {
@@ -79,6 +76,7 @@ p {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-bottom: 2rem;
 }
 
 .cotizaciones h2 {
