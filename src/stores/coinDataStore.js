@@ -11,6 +11,8 @@ export const useCoinDataStore = defineStore("coinData", {
             "btc",
             "eth",
             "dai",
+            "sol",
+            "ada",
         ],
 
         /* 
@@ -50,7 +52,9 @@ export const useCoinDataStore = defineStore("coinData", {
                 this.cotizaciones[moneda] = {}
 
                 for (let exchange in this.exchanges) {
-                    this.cotizaciones[moneda][exchange] = cotizacionesObtenidas[exchange]
+                    if (exchange in cotizacionesObtenidas) {
+                        this.cotizaciones[moneda][exchange] = cotizacionesObtenidas[exchange]
+                    }
                 }
             }
         },
