@@ -61,17 +61,20 @@ export default {
             </tr>
         </thead>
         <tbody>
-            <tr v-for="(meta, exchange) in exchanges" v-if="cotizaciones['btc']">
-                <td>
-                    <a 
-                        :href="meta.sitioWeb"
-                        target="_blank"
-                    >
-                        {{ meta.nombreMostrado }}
-                    </a>
-                </td>
-                <td>{{ obtenerMontoFormateado(cotizaciones[monedaSeleccionada][exchange].totalAsk) }}</td>
-                <td>{{ obtenerMontoFormateado(cotizaciones[monedaSeleccionada][exchange].totalBid) }}</td>
+            <tr v-for="(cotizacion, exchange) in cotizaciones[monedaSeleccionada]">
+                <template v-if="cotizaciones[monedaSeleccionada]?.[exchange]">
+                    <td>
+                        <a
+                            :href="exchanges[exchange].sitioWeb"
+                            target="_blank"
+                        >
+                            {{ exchanges[exchange].nombreMostrado }}
+                        </a>
+                    </td>
+
+                    <td>{{ obtenerMontoFormateado(cotizacion.totalAsk) }}</td>
+                    <td>{{ obtenerMontoFormateado(cotizacion.totalBid) }}</td>
+                </template>
             </tr>
         </tbody>
     </table>
