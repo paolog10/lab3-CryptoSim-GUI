@@ -6,7 +6,8 @@ import { obtenerMontoFormateado } from "../helpers/formateoMonto"
 export default {
     data() {
         return {
-            monedaSeleccionada: "btc",
+            // Moneda por defecto será siempre la primera en la lista de monedas aceptadas
+            monedaSeleccionada: useCoinDataStore().monedasAceptadas[0],
         }
     },
 
@@ -32,10 +33,17 @@ export default {
             <tr>
                 <th colspan="3">
                     <label>
-                        <select name="coins" v-model="monedaSeleccionada">
-                            <option value="btc">BTC</option>
-                            <option value="eth">ETH</option>
-                            <option value="dai">DAI</option>
+                        <select
+                            name="coins"
+                            v-model="monedaSeleccionada"
+                        >
+                            <option
+                                selected
+                                :value="moneda"
+                                v-for="moneda in monedasAceptadas"
+                            >
+                                {{ moneda.toUpperCase() }}
+                            </option>
                         </select>
                     </label>
                 </th>
