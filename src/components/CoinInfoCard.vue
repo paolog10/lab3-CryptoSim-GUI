@@ -61,7 +61,10 @@ export default {
             </tr>
         </thead>
         <tbody>
-            <tr v-for="(cotizacion, exchange) in cotizaciones[monedaSeleccionada]">
+            <tr v-if="!cotizaciones[monedaSeleccionada]">
+                <td v-for="i in 3">⋯</td>
+            </tr>
+            <tr v-else v-for="(cotizacion, exchange) in cotizaciones[monedaSeleccionada]">
                 <template v-if="cotizaciones[monedaSeleccionada]?.[exchange]">
                     <td>
                         <a
