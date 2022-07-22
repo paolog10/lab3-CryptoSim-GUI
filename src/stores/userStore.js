@@ -32,7 +32,7 @@ export const useUserStore = defineStore('user', {
             localStorage.removeItem('username');
         },
 
-        async actualizarHistorialTransacciones() {
+        async cargarHistorialTransacciones() {
             const respuesta = await apiTransacciones.get("transactions", {
                 params: {
                     q: `{"user_id": "${this.username}"}`
@@ -46,6 +46,16 @@ export const useUserStore = defineStore('user', {
             this.estadoUltimaTransaccion = "procesando"
             const respuesta = await apiTransacciones.post("transactions", datos)
             this.estadoUltimaTransaccion = (respuesta.status === 201) ? "aceptada" : "rechazada"
+
+            // Mantener historial actualizado para no tener que llamar de nuevo a la API
+            this.historialTransacciones.push({
+                "_id": respuesta.data["_id"],
+                "crypto_code": respuesta.data["crypto_code"],
+                "crypto_amount": respuesta.data["crypto_amount"],
+                "user_id": respuesta.data["user_id"],
+                "action": respuesta.data["action"],
+                "datetime": respuesta.data["datetime"]
+            })
         }
     }
 })
