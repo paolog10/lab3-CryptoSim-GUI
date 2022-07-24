@@ -1,5 +1,6 @@
 import { defineStore } from "pinia"
 import axios from "axios"
+import Decimal from "decimal.js"
 
 const apiTransacciones = axios.create({
     baseURL: "https://laboratorio3-f36a.restdb.io/rest",
@@ -16,12 +17,14 @@ export const useUserStore = defineStore('user', {
         username: localStorage.getItem('username'),
         historialTransacciones: null,
         estadoUltimaTransaccion: null,
+        cartera: {},
     }),
 
     actions: {
         login(username, mantenerSesionAbierta) {
             this.username = username
             this.cargarHistorialTransacciones()
+                .then(() => this.cargarCartera())
 
             if (mantenerSesionAbierta) {
                 localStorage.setItem('username', username)
@@ -31,6 +34,7 @@ export const useUserStore = defineStore('user', {
         logout() {
             this.historialTransacciones = null
             this.estadoUltimaTransaccion = null
+            this.cartera = {}
             this.username = null
             localStorage.removeItem('username')
         },
@@ -50,15 +54,47 @@ export const useUserStore = defineStore('user', {
             const respuesta = await apiTransacciones.post("transactions", datos)
             this.estadoUltimaTransaccion = (respuesta.status === 201) ? "aceptada" : "rechazada"
 
-            // Mantener historial actualizado para no tener que llamar de nuevo a la API
-            this.historialTransacciones.push({
+            const transaccion = {
                 "_id": respuesta.data["_id"],
                 "crypto_code": respuesta.data["crypto_code"],
                 "crypto_amount": respuesta.data["crypto_amount"],
                 "user_id": respuesta.data["user_id"],
                 "action": respuesta.data["action"],
                 "datetime": respuesta.data["datetime"]
-            })
-        }
+            }
+
+            // Mantener historial actualizado para no tener que llamar de nuevo a la API
+            this.historialTransacciones.push(transaccion)
+            this.actualizarCartera(transaccion)
+        },
+
+        cargarCartera() {
+            for (const transaccion of this.historialTransacciones) {
+                this.actualizarCartera(transaccion)
+            }
+        },
+
+        actualizarCartera(transaccion) {
+            if (!(transaccion["crypto_code"] in this.cartera)) {
+                this.cartera[transaccion["crypto_code"]] = {
+                    cantidad: 0,
+                }
+            }
+
+            // Se usa Decimal para poder sumar numeros decimales con mayor precisión
+            // Ejemplo: evitar que operaciones como 0.4 + 0.2 resulten en 0.6000000000000001
+            const cantidadActual = new Decimal(this.cartera[transaccion["crypto_code"]].cantidad)
+            const cantidadTransaccion = new Decimal(transaccion["crypto_amount"])
+            if (transaccion["action"] === "purchase") {
+                this.cartera[transaccion["crypto_code"]].cantidad = cantidadActual
+                    .plus(cantidadTransaccion)
+                    .toNumber()
+            }
+            else {
+                this.cartera[transaccion["crypto_code"]].cantidad = cantidadActual
+                    .minus(cantidadTransaccion)
+                    .toNumber()
+            }
+        },
     }
 })

@@ -15,12 +15,13 @@ export default {
     },
 
     methods: {
-        ...mapActions(useUserStore, ["cargarHistorialTransacciones"])
+        ...mapActions(useUserStore, ["cargarCartera", "cargarHistorialTransacciones"])
     },
 
     mounted() {
         if (this.username) {
             this.cargarHistorialTransacciones()
+                .then(() => this.cargarCartera())
         }
     }
 }
