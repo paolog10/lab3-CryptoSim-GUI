@@ -1,5 +1,5 @@
 <script>
-import { mapActions, mapState } from "pinia"
+import { mapActions, mapState, mapWritableState } from "pinia"
 import { useCoinDataStore } from "../stores/coinDataStore"
 import { useUserStore } from "../stores/userStore"
 
@@ -17,7 +17,8 @@ export default {
 
     computed: {
         ...mapState(useCoinDataStore, ["monedasAceptadas"]),
-        ...mapState(useUserStore, ["username", "estadoUltimaTransaccion"]),
+        ...mapState(useUserStore, ["username"]),
+        ...mapWritableState(useUserStore, ["estadoUltimaTransaccion"]),
 
         esCantidadMonedaValida() {
             return this.cantidadMoneda > 0
@@ -66,6 +67,10 @@ export default {
                 "datetime": this.fechaSeleccionada.replace("T", " "),
             })
         },
+    },
+
+    mounted() {
+        this.estadoUltimaTransaccion = null
     },
 }
 </script>
