@@ -21,6 +21,7 @@ export const useUserStore = defineStore('user', {
     actions: {
         login(username, mantenerSesionAbierta) {
             this.username = username
+            this.cargarHistorialTransacciones()
 
             if (mantenerSesionAbierta) {
                 localStorage.setItem('username', username)
@@ -28,8 +29,10 @@ export const useUserStore = defineStore('user', {
         },
 
         logout() {
-            this.username = null;
-            localStorage.removeItem('username');
+            this.historialTransacciones = null
+            this.estadoUltimaTransaccion = null
+            this.username = null
+            localStorage.removeItem('username')
         },
 
         async cargarHistorialTransacciones() {

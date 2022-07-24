@@ -1,11 +1,27 @@
 <script>
 import TheHeader from "./components/TheHeader.vue"
 import TheFooter from "./components/TheFooter.vue"
+import { useUserStore } from "./stores/userStore"
+import { mapActions, mapState } from "pinia"
 
 export default {
     components: {
         TheHeader,
         TheFooter,
+    },
+
+    computed: {
+        ...mapState(useUserStore, ["historialTransacciones", "username"])
+    },
+
+    methods: {
+        ...mapActions(useUserStore, ["cargarHistorialTransacciones"])
+    },
+
+    mounted() {
+        if (this.username) {
+            this.cargarHistorialTransacciones()
+        }
     }
 }
 </script>
