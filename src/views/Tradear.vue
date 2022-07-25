@@ -17,11 +17,17 @@ export default {
 
     computed: {
         ...mapState(useCoinDataStore, ["monedasAceptadas"]),
-        ...mapState(useUserStore, ["username"]),
+        ...mapState(useUserStore, ["username", "cartera"]),
         ...mapWritableState(useUserStore, ["estadoUltimaTransaccion"]),
 
         esCantidadMonedaValida() {
+            if (this.tipoDeOperacion === "purchase") {
+                return this.cantidadMoneda > 0
+            }
+
             return this.cantidadMoneda > 0
+                && this.cantidadMoneda <= this.cartera[this.monedaSeleccionada].cantidad
+
         },
 
         // Los montos se expresarán solo en pesos, sin centavos
@@ -33,7 +39,11 @@ export default {
         esFechaValida() {
             return this.fechaSeleccionada !== ""
                 && this.fechaSeleccionada <= this.obtenerFechaActual()
-        }
+        },
+
+        carteraCargo() {
+            return Object.keys(this.cartera).length > 0
+        },
     },
 
     methods: {
@@ -66,7 +76,19 @@ export default {
                 // La API de transacciones guarda fechas en el mismo formato pero sin la 'T'
                 "datetime": this.fechaSeleccionada.replace("T", " "),
             })
+
+            this.reiniciarFormulario()
         },
+
+        // PENDIENTE: Averiguar si se puede refactorizar esto
+        reiniciarFormulario() {
+            this.tipoDeOperacion = "purchase"
+            this.monedaSeleccionada = useCoinDataStore().monedasAceptadas[0]
+            this.cantidadMoneda = null
+            this.monto = null
+            this.fechaSeleccionada = null
+            this.transaccionInvalida = false
+        }
     },
 
     mounted() {
@@ -77,97 +99,115 @@ export default {
 
 <template>
 <div class="trade-view">
+    <div class="form-cargando">
+        <p v-if="!carteraCargo">Cargando...</p>
+    </div>
     <form novalidate @submit.prevent="intentarTransaccion">
-        <label class="control-without-feedback">
-            <span class="label-text">Tipo de operación</span>
-            <select
-                name="operaciones"
-                v-model="tipoDeOperacion"
-            >
-                <option value="purchase">Compra</option>
-            </select>
-        </label>
-
-        <label class="control-without-feedback">
-            <span class="label-text">Moneda</span>
-            <select
-                name="coins"
-                v-model="monedaSeleccionada"
-            >
-                <option
-                    :value="moneda"
-                    v-for="moneda in monedasAceptadas"
+        <fieldset :disabled="
+            estadoUltimaTransaccion === 'procesando'
+            || !carteraCargo
+        ">
+            <label class="control-without-feedback">
+                <span class="label-text">Tipo de operación</span>
+                <select
+                    name="operaciones"
+                    v-model="tipoDeOperacion"
                 >
-                    {{ moneda.toUpperCase() }}
-                </option>
-            </select>
-        </label>
+                    <option value="purchase">Compra</option>
+                    <option value="sale">Venta</option>
+                </select>
+            </label>
 
-        <label class="control-with-feedback">
-            <span class="label-text">Cantidad</span>
-            <input
-                type="number"
-                v-model="cantidadMoneda"
-                step="any"
-                @input=""
-            >
-            <div class="input-feedback">
-                <small
-                    v-if="
-                        (!esCantidadMonedaValida && cantidadMoneda !== null)
-                        || (!esCantidadMonedaValida && transaccionInvalida)
-                    "
+            <label class="control-without-feedback">
+                <span class="label-text">Moneda</span>
+                <select
+                    name="coins"
+                    v-model="monedaSeleccionada"
                 >
-                    Debe ser un número mayor a 0
-                </small>
-            </div>
-        </label>
+                    <option
+                        :value="moneda"
+                        v-for="moneda in monedasAceptadas"
+                    >
+                        {{ moneda.toUpperCase() }}
+                    </option>
+                </select>
+            </label>
 
-        <label class="control-with-feedback">
-            <span class="label-text">Monto</span>
-            <span class="signo-monto">$</span>
-            <input
-                type="number"
-                v-model="monto"
-            >
-            <div class="input-feedback">
-                <small
-                    v-if="
-                        (!esMontoValido && monto !== null)
-                        || (!esMontoValido && transaccionInvalida)
-                    "
+            <label class="control-with-feedback">
+                <span class="label-text">Cantidad</span>
+                <input
+                    type="number"
+                    v-model="cantidadMoneda"
+                    step="any"
+                    @input=""
                 >
-                    Debe ser un entero mayor a 0
-                </small>
-            </div>
-        </label>
+                <div class="input-feedback">
+                    <small
+                        v-if="
+                            (!esCantidadMonedaValida && cantidadMoneda !== null)
+                            || (!esCantidadMonedaValida && transaccionInvalida)
+                        "
+                    >
+                        <template v-if="tipoDeOperacion === 'purchase'">
+                            Debe ser mayor a 0
+                        </template>
 
-        <label class="control-with-feedback">
-            <span class="label-text">Fecha</span>
-            <input
-                type="datetime-local"
-                :max="obtenerFechaActual()"
-                v-model="fechaSeleccionada"
-            >
-            <div class="input-feedback">
-                <small
-                    v-if="
-                        (!esFechaValida && fechaSeleccionada !== null)
-                        || (!esFechaValida && transaccionInvalida)
-                    "
+                        <template v-else-if="tipoDeOperacion === 'sale' && !(cartera[this.monedaSeleccionada].cantidad > 0)">
+                            No posee {{ monedaSeleccionada.toUpperCase() }} para vender
+                        </template>
+
+                        <template v-else>
+                            Debe estar en el rango 0 &lt x ≤ {{ cartera[this.monedaSeleccionada].cantidad }}
+                        </template>
+                    </small>
+                </div>
+            </label>
+
+            <label class="control-with-feedback">
+                <span class="label-text">Monto</span>
+                <span class="signo-monto">$</span>
+                <input
+                    type="number"
+                    v-model="monto"
                 >
-                    Debe ser igual o previo a la hora actual
-                </small>
-            </div>
-        </label>
+                <div class="input-feedback">
+                    <small
+                        v-if="
+                            (!esMontoValido && monto !== null)
+                            || (!esMontoValido && transaccionInvalida)
+                        "
+                    >
+                        Debe ser un entero mayor a 0
+                    </small>
+                </div>
+            </label>
 
-        <button
-            type="submit"
-            class="submit-button"
-            :disabled="estadoUltimaTransaccion === 'procesando'"
-        >
-            Registrar operación
-        </button>
+            <label class="control-with-feedback">
+                <span class="label-text">Fecha</span>
+                <input
+                    type="datetime-local"
+                    :max="obtenerFechaActual()"
+                    v-model="fechaSeleccionada"
+                >
+                <div class="input-feedback">
+                    <small
+                        v-if="
+                            (!esFechaValida && fechaSeleccionada !== null)
+                            || (!esFechaValida && transaccionInvalida)
+                        "
+                    >
+                        Debe ser igual o previo a la hora actual
+                    </small>
+                </div>
+            </label>
+
+            <button
+                type="submit"
+                class="submit-button"
+            >
+                Registrar operación
+            </button>
+        </fieldset>
     </form>
 
     <div class="transaction-feedback">
@@ -213,9 +253,20 @@ form {
     padding: 1.6rem 3rem;
     border: solid 1px #333;
     background-color: rgb(235, 235, 235);
+    width: 15.5rem;
+}
+
+.form-cargando {
+    height: 1.3rem;
+}
+
+.form-cargando p {
+    margin: 0;
+}
+
+fieldset {
+    all: initial;
     font-size: 0.9rem;
-    font-weight: 400;
-    width: 15rem;
 }
 
 label {
@@ -259,6 +310,7 @@ select {
     cursor: pointer;
     font-weight: 600;
     margin-top: 0.5rem;
+    width: 100%;
 }
 
 .submit-button:hover {
@@ -269,9 +321,8 @@ select {
     background-color: #ff9320;
 }
 
-.submit-button:disabled {
+fieldset:disabled * {
     cursor: default;
-    background-color: #FF9C33;
 }
 
 .input-feedback {
