@@ -17,6 +17,7 @@ export const useUserStore = defineStore('user', {
         username: localStorage.getItem('username'),
         historialTransacciones: null,
         estadoTransaccionRegistrandose: null,
+        estadoTransaccionEliminandose: null,
         cartera: {},
     }),
 
@@ -108,6 +109,17 @@ export const useUserStore = defineStore('user', {
                     .minus(cantidadTransaccion)
                     .toNumber()
             }
+        },
+
+        async eliminarTransaccion(transaccion) {
+            this.estadoTransaccionEliminandose = "procesando"
+            const respuesta = await apiTransacciones.delete(`transactions/${transaccion["_id"]}`)
+            this.estadoTransaccionEliminandose = (respuesta.status === 200) ? "aceptada" : "rechazada"
+
+            this.historialTransacciones = this.historialTransacciones
+                .filter(transaccionRegistrada => transaccionRegistrada["_id"] !== transaccion["_id"])
+
+            this.actualizarCartera(transaccion, "elimina")
         },
     }
 })

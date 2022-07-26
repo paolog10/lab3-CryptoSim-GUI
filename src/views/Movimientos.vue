@@ -1,5 +1,5 @@
 <script>
-import { mapState } from "pinia"
+import { mapState, mapActions, mapWritableState } from "pinia"
 import { useUserStore } from "../stores/userStore"
 import { obtenerMontoFormateado } from "../helpers/formateoMonto"
 import { obtenerFechaFormateada } from "../helpers/formateoFecha"
@@ -7,11 +7,19 @@ import IconEdit from "../components/icons/IconEdit.vue"
 import IconDelete from "../components/icons/IconDelete.vue"
 
 export default {
+    data() {
+        return {
+            intentoEliminarTransaccionInvalido: false,
+        }
+    },
+
     computed: {
-        ...mapState(useUserStore, ["historialTransacciones"])
+        ...mapState(useUserStore, ["historialTransacciones", "cartera"]),
+        ...mapWritableState(useUserStore, ["estadoTransaccionEliminandose"]),
     },
 
     methods: {
+        ...mapActions(useUserStore, ["eliminarTransaccion"]),
         obtenerMontoFormateado,
         obtenerFechaFormateada,
 
@@ -19,13 +27,35 @@ export default {
             return this.historialTransacciones.sort(
                 (a, b) => a["datetime"].localeCompare(b["datetime"]) * -1
             )
-        }
+        sePuedeEliminarTransaccion(transaccion) {
+            if (
+                transaccion["action"] === "purchase"
+                && (this.cartera[transaccion["crypto_code"]].cantidad - transaccion["crypto_amount"]) < 0
+            ) {
+                return false
+            }
+
+            return true
+        },
+
+        intentarEliminarTransaccion(transaccion) {
+            if (!this.sePuedeEliminarTransaccion(transaccion)) {
+                return this.intentoEliminarTransaccionInvalido = true
+            }
+
+            this.intentoEliminarTransaccionInvalido = false
+            this.eliminarTransaccion(transaccion)
+        },
     },
 
     components: {
         IconDelete,
         IconEdit,
     },
+
+    mounted() {
+        this.estadoTransaccionEliminandose = null
+    }
 }
 </script>
 
@@ -33,41 +63,66 @@ export default {
 <div class="movimientos-view">
     <p v-if="!historialTransacciones" class="historial-cargando">Cargando...</p>
 
-    <table v-else>
-        <thead>
-            <tr>
-                <th></th>
-                <th>Fecha</th>
-                <th>Operación</th>
-                <th class="smaller">Moneda</th>
-                <th>Cantidad</th>
-                <th>Monto</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="transaccion in ordenarHistorialPorFecha()">
-                <td class="opciones-transaccion">
-                    <button>
-                        <IconDelete/>
-                    </button>
-                    <button>
-                        <IconEdit/>
-                    </button>
-                </td>
-                <td>{{ obtenerFechaFormateada(transaccion["datetime"]) }}</td>
-                <td>
-                    {{
-                        transaccion["action"] === "purchase"
-                        ? "Compra"
-                        : "Venta"
-                    }}
-                </td>
-                <td>{{ transaccion["crypto_code"].toUpperCase() }}</td>
-                <td>{{ transaccion["crypto_amount"] }}</td>
-                <td>{{ obtenerMontoFormateado(transaccion["money"]) }}</td>
-            </tr>
-        </tbody>
-    </table>
+    <template v-else>
+        <div class="eliminar-feedback">
+            <p v-if="intentoEliminarTransaccionInvalido">
+                No se puede eliminar: las ventas posteriores serían inválidas
+            </p>
+            <p v-else-if="estadoTransaccionEliminandose === 'procesando'">
+                Eliminando transacción...
+            </p>
+            <p v-else-if="estadoTransaccionEliminandose === 'aceptada'">
+                Transacción eliminada
+            </p>
+            <p v-else-if="estadoTransaccionEliminandose === 'rechazada'">
+                Error: no se pudo eliminar la transacción
+            </p>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <!--
+                      El th vacío es para la columna que contiene a los botones
+                      para eliminar o editar transacciones
+                    -->
+                    <th></th>
+                    <th>Fecha</th>
+                    <th>Operación</th>
+                    <th>Moneda</th>
+                    <th>Cantidad</th>
+                    <th>Monto</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr
+                    v-for="transaccion in ordenarHistorialPorFecha()"
+                >
+                    <td class="opciones-transaccion">
+                        <button
+                            :disabled="estadoTransaccionEliminandose === 'procesando'"
+                            @click="intentarEliminarTransaccion(transaccion)"
+                        >
+                            <IconDelete/>
+                        </button>
+                        <button>
+                            <IconEdit/>
+                        </button>
+                    </td>
+                    <td>{{ obtenerFechaFormateada(transaccion["datetime"]) }}</td>
+                    <td>
+                        {{
+                            transaccion["action"] === "purchase"
+                            ? "Compra"
+                            : "Venta"
+                        }}
+                    </td>
+                    <td>{{ transaccion["crypto_code"].toUpperCase() }}</td>
+                    <td>{{ transaccion["crypto_amount"] }}</td>
+                    <td>{{ obtenerMontoFormateado(transaccion["money"]) }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </template>
 </div>
 </template>
 
@@ -92,7 +147,8 @@ export default {
     margin-top: 2.5rem;
     margin-bottom: auto;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
 }
 
 table {
@@ -168,5 +224,20 @@ button {
 
 button:hover {
     stroke: #FF9C33;
+}
+
+button:disabled {
+    cursor: default;
+    fill: gray;
+    stroke: gray;
+}
+
+.eliminar-feedback {
+    height: 2rem;
+}
+
+.eliminar-feedback p {
+    margin: 0;
+    font-size: 1.2rem;
 }
 </style>
