@@ -16,7 +16,7 @@ export const useUserStore = defineStore('user', {
         // Defaultea a 'null' si no hay sesión abierta
         username: localStorage.getItem('username'),
         historialTransacciones: null,
-        estadoUltimaTransaccion: null,
+        estadoTransaccionRegistrandose: null,
         cartera: {},
     }),
 
@@ -33,7 +33,6 @@ export const useUserStore = defineStore('user', {
 
         logout() {
             this.historialTransacciones = null
-            this.estadoUltimaTransaccion = null
             this.cartera = {}
             this.username = null
             localStorage.removeItem('username')
@@ -50,9 +49,9 @@ export const useUserStore = defineStore('user', {
         },
 
         async registrarTransaccion(datos) {
-            this.estadoUltimaTransaccion = "procesando"
+            this.estadoTransaccionRegistrandose = "procesando"
             const respuesta = await apiTransacciones.post("transactions", datos)
-            this.estadoUltimaTransaccion = (respuesta.status === 201) ? "aceptada" : "rechazada"
+            this.estadoTransaccionRegistrandose = (respuesta.status === 201) ? "aceptada" : "rechazada"
 
             const transaccion = {
                 "_id": respuesta.data["_id"],

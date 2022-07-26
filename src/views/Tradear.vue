@@ -18,7 +18,7 @@ export default {
     computed: {
         ...mapState(useCoinDataStore, ["monedasAceptadas"]),
         ...mapState(useUserStore, ["username", "cartera"]),
-        ...mapWritableState(useUserStore, ["estadoUltimaTransaccion"]),
+        ...mapWritableState(useUserStore, ["estadoTransaccionRegistrandose"]),
 
         esCantidadMonedaValida() {
             if (this.tipoDeOperacion === "purchase") {
@@ -92,7 +92,7 @@ export default {
     },
 
     mounted() {
-        this.estadoUltimaTransaccion = null
+        this.estadoTransaccionRegistrandose = null
     },
 }
 </script>
@@ -104,7 +104,7 @@ export default {
     </div>
     <form novalidate @submit.prevent="intentarTransaccion">
         <fieldset :disabled="
-            estadoUltimaTransaccion === 'procesando'
+            estadoTransaccionRegistrandose === 'procesando'
             || !carteraCargo
         ">
             <label class="control-without-feedback">
@@ -211,17 +211,17 @@ export default {
     </form>
 
     <div class="transaction-feedback">
-        <p v-if="estadoUltimaTransaccion === 'procesando'">
+        <p v-if="estadoTransaccionRegistrandose === 'procesando'">
             Procesando transacción...
         </p>
         <p
-            v-else-if="estadoUltimaTransaccion === 'aceptada'"
+            v-else-if="estadoTransaccionRegistrandose === 'aceptada'"
             class="success"
         >
             Transacción registrada con éxito
         </p>
         <p
-            v-else-if="estadoUltimaTransaccion === 'rechazada'"
+            v-else-if="estadoTransaccionRegistrandose === 'rechazada'"
             class="failure"
         >
             Error: transacción rechazada
