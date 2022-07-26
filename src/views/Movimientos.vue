@@ -65,6 +65,14 @@ export default {
 <div class="movimientos-view">
     <p v-if="!historialTransacciones" class="historial-cargando">Cargando...</p>
 
+    <div
+        v-else-if="historialTransacciones.length === 0"
+        class="historial-vacio"
+    >
+        <p>No tenés transacciones registradas</p>
+        <p>Realiza una en la pestaña "Tradear" para poder utilizar esta función</p>
+    </div>
+
     <template v-else>
         <div class="eliminar-feedback">
             <p v-if="intentoEliminarTransaccionInvalido">
@@ -143,6 +151,19 @@ export default {
     font-size: 2rem;
     outline: solid 5px #FF9C33;
     outline-offset: 1rem;
+    position: absolute;
+    top: 40vh;
+}
+
+.historial-vacio {
+    font-size: 2rem;
+    text-align: center;
+    position: absolute;
+    top: 40vh;
+}
+
+.historial-vacio p {
+    margin: 1rem 0;
 }
 
 .movimientos-view {
