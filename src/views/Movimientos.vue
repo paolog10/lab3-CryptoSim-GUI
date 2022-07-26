@@ -25,8 +25,10 @@ export default {
 
         ordenarHistorialPorFecha() {
             return this.historialTransacciones.sort(
-                (a, b) => a["datetime"].localeCompare(b["datetime"]) * -1
+                (a, b) => a["_id"].localeCompare(b["_id"]) * -1
             )
+        },
+
         sePuedeEliminarTransaccion(transaccion) {
             if (
                 transaccion["action"] === "purchase"
