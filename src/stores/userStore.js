@@ -60,7 +60,8 @@ export const useUserStore = defineStore('user', {
                 "crypto_amount": respuesta.data["crypto_amount"],
                 "user_id": respuesta.data["user_id"],
                 "action": respuesta.data["action"],
-                "datetime": respuesta.data["datetime"]
+                "datetime": respuesta.data["datetime"],
+                "money": respuesta.data["money"],
             }
 
             // Mantener historial actualizado para no tener que llamar de nuevo a la API
