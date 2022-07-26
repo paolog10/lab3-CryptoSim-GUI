@@ -49,12 +49,12 @@ export const useUserStore = defineStore('user', {
             this.historialTransacciones = await respuesta.data
         },
 
-        async registrarTransaccion(datos) {
+        async registrarTransaccion(transaccion) {
             this.estadoTransaccionRegistrandose = "procesando"
-            const respuesta = await apiTransacciones.post("transactions", datos)
+            const respuesta = await apiTransacciones.post("transactions", transaccion)
             this.estadoTransaccionRegistrandose = (respuesta.status === 201) ? "aceptada" : "rechazada"
 
-            const transaccion = {
+            const transaccionRegistrada = {
                 "_id": respuesta.data["_id"],
                 "crypto_code": respuesta.data["crypto_code"],
                 "crypto_amount": respuesta.data["crypto_amount"],
@@ -64,8 +64,8 @@ export const useUserStore = defineStore('user', {
             }
 
             // Mantener historial actualizado para no tener que llamar de nuevo a la API
-            this.historialTransacciones.push(transaccion)
-            this.actualizarCartera(transaccion)
+            this.historialTransacciones.push(transaccionRegistrada)
+            this.actualizarCartera(transaccionRegistrada, "registra")
         },
 
         cargarCartera() {
