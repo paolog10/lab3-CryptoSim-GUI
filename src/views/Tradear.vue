@@ -26,7 +26,7 @@ export default {
             }
 
             return this.cantidadMoneda > 0
-                && this.cantidadMoneda <= this.cartera[this.monedaSeleccionada].cantidad
+                && this.cantidadMoneda <= this.cartera[this.monedaSeleccionada]?.cantidad
 
         },
 
@@ -148,7 +148,7 @@ export default {
                             Debe ser mayor a 0
                         </template>
 
-                        <template v-else-if="tipoDeOperacion === 'sale' && !(cartera[this.monedaSeleccionada].cantidad > 0)">
+                        <template v-else-if="tipoDeOperacion === 'sale' && !(cartera[this.monedaSeleccionada]?.cantidad > 0)">
                             No posee {{ monedaSeleccionada.toUpperCase() }} para vender
                         </template>
 
