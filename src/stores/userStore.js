@@ -18,7 +18,7 @@ export const useUserStore = defineStore('user', {
         historialTransacciones: null,
         estadoTransaccionRegistrandose: null,
         estadoTransaccionEliminandose: null,
-        cartera: {},
+        cartera: null,
     }),
 
     actions: {
@@ -34,7 +34,7 @@ export const useUserStore = defineStore('user', {
 
         logout() {
             this.historialTransacciones = null
-            this.cartera = {}
+            this.cartera = null
             this.username = null
             localStorage.removeItem('username')
         },
@@ -66,49 +66,32 @@ export const useUserStore = defineStore('user', {
 
             // Mantener historial actualizado para no tener que llamar de nuevo a la API
             this.historialTransacciones.push(transaccionRegistrada)
-            this.actualizarCartera(transaccionRegistrada, "registra")
+            this.cargarCartera()
         },
 
         cargarCartera() {
+            this.cartera = {}
             for (const transaccion of this.historialTransacciones) {
-                this.actualizarCartera(transaccion, "registra")
-            }
-        },
-
-        /*
-        ** La cartera se actualiza según como la transacción altere al historial
-        ** comoAlteraHistorial: "registra" o "elimina" (string)
-        */
-        actualizarCartera(transaccion, comoAlteraHistorial) {
-            if (!["registra", "elimina"].includes(comoAlteraHistorial)) {
-                throw new Error('Indicar cómo la transacción altera al historial pasando uno de los argumentos:\n' +
-                    '"registra": Nueva transacción que se agrega al historial\n' +
-                    '"elimina": Transacción ya existente que se elimina del historial'
-                )
-            }
-
-            if (!(transaccion["crypto_code"] in this.cartera)) {
-                this.cartera[transaccion["crypto_code"]] = {
-                    cantidad: 0,
+                if (!(transaccion["crypto_code"] in this.cartera)) {
+                    this.cartera[transaccion["crypto_code"]] = {
+                        cantidad: 0,
+                    }
                 }
-            }
 
-            // Se usa Decimal para poder sumar numeros decimales con mayor precisión
-            // Ejemplo: evitar que operaciones como 0.4 + 0.2 resulten en 0.6000000000000001
-            const cantidadActual = new Decimal(this.cartera[transaccion["crypto_code"]].cantidad)
-            const cantidadTransaccion = new Decimal(transaccion["crypto_amount"])
-            if (
-                transaccion["action"] === "purchase" && comoAlteraHistorial === "registra"
-                || transaccion["action"] === "sale" && comoAlteraHistorial === "elimina"
-            ) {
-                this.cartera[transaccion["crypto_code"]].cantidad = cantidadActual
-                    .plus(cantidadTransaccion)
-                    .toNumber()
-            }
-            else {
-                this.cartera[transaccion["crypto_code"]].cantidad = cantidadActual
-                    .minus(cantidadTransaccion)
-                    .toNumber()
+                // Se usa Decimal para poder sumar numeros decimales con mayor precisión
+                // Ejemplo: evitar que operaciones como 0.4 + 0.2 resulten en 0.6000000000000001
+                const cantidadActual = new Decimal(this.cartera[transaccion["crypto_code"]].cantidad)
+                const cantidadTransaccion = new Decimal(transaccion["crypto_amount"])
+                if (transaccion["action"] === "purchase") {
+                    this.cartera[transaccion["crypto_code"]].cantidad = cantidadActual
+                        .plus(cantidadTransaccion)
+                        .toNumber()
+                }
+                else {
+                    this.cartera[transaccion["crypto_code"]].cantidad = cantidadActual
+                        .minus(cantidadTransaccion)
+                        .toNumber()
+                }
             }
         },
 
@@ -120,7 +103,7 @@ export const useUserStore = defineStore('user', {
             this.historialTransacciones = this.historialTransacciones
                 .filter(transaccionRegistrada => transaccionRegistrada["_id"] !== transaccion["_id"])
 
-            this.actualizarCartera(transaccion, "elimina")
+            this.cargarCartera()
         },
     }
 })
