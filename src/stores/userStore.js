@@ -69,11 +69,22 @@ export const useUserStore = defineStore('user', {
 
         cargarCartera() {
             for (const transaccion of this.historialTransacciones) {
-                this.actualizarCartera(transaccion)
+                this.actualizarCartera(transaccion, "registra")
             }
         },
 
-        actualizarCartera(transaccion) {
+        /*
+        ** La cartera se actualiza según como la transacción altere al historial
+        ** comoAlteraHistorial: "registra" o "elimina" (string)
+        */
+        actualizarCartera(transaccion, comoAlteraHistorial) {
+            if (!["registra", "elimina"].includes(comoAlteraHistorial)) {
+                throw new Error('Indicar cómo la transacción altera al historial pasando uno de los argumentos:\n' +
+                    '"registra": Nueva transacción que se agrega al historial\n' +
+                    '"elimina": Transacción ya existente que se elimina del historial'
+                )
+            }
+
             if (!(transaccion["crypto_code"] in this.cartera)) {
                 this.cartera[transaccion["crypto_code"]] = {
                     cantidad: 0,
@@ -84,7 +95,10 @@ export const useUserStore = defineStore('user', {
             // Ejemplo: evitar que operaciones como 0.4 + 0.2 resulten en 0.6000000000000001
             const cantidadActual = new Decimal(this.cartera[transaccion["crypto_code"]].cantidad)
             const cantidadTransaccion = new Decimal(transaccion["crypto_amount"])
-            if (transaccion["action"] === "purchase") {
+            if (
+                transaccion["action"] === "purchase" && comoAlteraHistorial === "registra"
+                || transaccion["action"] === "sale" && comoAlteraHistorial === "elimina"
+            ) {
                 this.cartera[transaccion["crypto_code"]].cantidad = cantidadActual
                     .plus(cantidadTransaccion)
                     .toNumber()
