@@ -17,7 +17,7 @@ export default {
 
     computed: {
         ...mapState(useCoinDataStore, ["monedasAceptadas"]),
-        ...mapState(useUserStore, ["username", "cartera"]),
+        ...mapState(useUserStore, ["username", "historialTransacciones", "cartera"]),
         ...mapWritableState(useUserStore, ["estadoTransaccionRegistrandose"]),
 
         esCantidadMonedaValida() {
@@ -39,10 +39,6 @@ export default {
         esFechaValida() {
             return this.fechaSeleccionada !== ""
                 && this.fechaSeleccionada <= this.obtenerFechaActual()
-        },
-
-        carteraCargo() {
-            return Object.keys(this.cartera).length > 0
         },
     },
 
@@ -100,12 +96,12 @@ export default {
 <template>
 <div class="trade-view">
     <div class="form-cargando">
-        <p v-if="!carteraCargo">Cargando...</p>
+        <p v-if="!historialTransacciones">Cargando...</p>
     </div>
     <form novalidate @submit.prevent="intentarTransaccion">
         <fieldset :disabled="
             estadoTransaccionRegistrandose === 'procesando'
-            || !carteraCargo
+            || !historialTransacciones
         ">
             <label class="control-without-feedback">
                 <span class="label-text">Tipo de operación</span>
