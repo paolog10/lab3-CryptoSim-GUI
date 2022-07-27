@@ -2,6 +2,7 @@
 import TheHeader from "./components/TheHeader.vue"
 import TheFooter from "./components/TheFooter.vue"
 import { useUserStore } from "./stores/userStore"
+import { useCoinDataStore } from "./stores/coinDataStore"
 import { mapActions, mapState } from "pinia"
 
 export default {
@@ -11,14 +12,18 @@ export default {
     },
 
     computed: {
-        ...mapState(useUserStore, ["historialTransacciones", "username"])
+        ...mapState(useUserStore, ["historialTransacciones", "username"]),
+        ...mapState(useCoinDataStore, ["cotizaciones"]),
     },
 
     methods: {
-        ...mapActions(useUserStore, ["cargarCartera", "cargarHistorialTransacciones"])
+        ...mapActions(useUserStore, ["cargarCartera", "cargarHistorialTransacciones"]),
+        ...mapActions(useCoinDataStore, ["actualizarCotizaciones"]),
     },
 
     mounted() {
+        this.actualizarCotizaciones()
+
         if (this.username) {
             this.cargarHistorialTransacciones()
                 .then(() => this.cargarCartera())
