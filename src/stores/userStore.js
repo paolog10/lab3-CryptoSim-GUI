@@ -18,6 +18,7 @@ export const useUserStore = defineStore('user', {
         historialTransacciones: null,
         estadoTransaccionRegistrandose: null,
         estadoTransaccionEliminandose: null,
+        estadoTransaccionEditandose: null,
         cartera: null,
     }),
 
@@ -105,5 +106,31 @@ export const useUserStore = defineStore('user', {
 
             this.cargarCartera()
         },
+
+        async editarTransaccion(transaccionEditada) {
+            this.estadoTransaccionEditandose = "procesando"
+            const respuesta = await apiTransacciones.patch(
+                `transactions/${transaccionEditada["_id"]}`,
+                transaccionEditada
+            )
+            this.estadoTransaccionEditandose = (respuesta.status === 200) ? "aceptada" : "rechazada"
+
+            // Modificar transaccion correspondiente en el historial
+            const posicionTransaccion = this.historialTransacciones.findIndex(
+                transaccion => transaccion["_id"] === transaccionEditada["_id"]
+            )
+
+            // En el historial, datetime se guarda con el formato que usa la API
+            transaccionEditada["datetime"] = respuesta.data["datetime"]
+
+            this.historialTransacciones[posicionTransaccion] = transaccionEditada
+            this.cargarCartera()
+        },
+
+        reiniciarEstados() {
+            this.estadoTransaccionRegistrandose = null
+            this.estadoTransaccionEditandose = null
+            this.estadoTransaccionEliminandose = null
+        }
     }
 })
