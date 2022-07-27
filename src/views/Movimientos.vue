@@ -9,6 +9,7 @@ import IconEdit from "../components/icons/IconEdit.vue"
 import IconDelete from "../components/icons/IconDelete.vue"
 import IconCheck from "../components/icons/IconCheck.vue"
 import IconCancel from "../components/icons/IconCancel.vue"
+import CargandoCartel from "../components/CargandoCartel.vue"
 
 export default {
     setup() {
@@ -110,6 +111,7 @@ export default {
         IconEdit,
         IconCheck,
         IconCancel,
+        CargandoCartel,
     },
 
     mounted() {
@@ -120,8 +122,7 @@ export default {
 
 <template>
 <div class="movimientos-view">
-    <p v-if="!historialTransacciones" class="historial-cargando">Cargando...</p>
-
+    <CargandoCartel v-if="!historialTransacciones"/>
     <div
         v-else-if="historialTransacciones.length === 0"
         class="historial-vacio"
@@ -296,20 +297,6 @@ export default {
 <style scoped>
 * {
     font-family: 'Montserrat', sans-serif;
-}
-
-/*
-  CORREGIR MÁS TARDE:
-  Refactorizar mensaje de carga en componente para reutilizar en otras vistas,
-  ya que la mayoría dependen de que el historial se encuentre cargado
-*/
-.historial-cargando {
-    font-weight: 600;
-    font-size: 2rem;
-    outline: solid 5px #FF9C33;
-    outline-offset: 1rem;
-    position: absolute;
-    top: 40vh;
 }
 
 .historial-vacio {
