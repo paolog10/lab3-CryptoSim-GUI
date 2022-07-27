@@ -12,7 +12,7 @@ export default {
 <template>
 <header>
     <nav>
-        <router-link class="navlink logo" :to="{name: 'Home'}">TimbaSim</router-link>
+        <router-link class="navlink logo" :to="{name: 'Home'}">CryptoSim</router-link>
 
         <template v-if="username">
             <div class="app-tools">

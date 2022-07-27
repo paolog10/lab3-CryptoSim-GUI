@@ -14,11 +14,11 @@ export default {
         <h1>Simula el intercambio de criptomonedas</h1>
         <div class="home-intro-descripcion">
             <p>
-                TimbaSim te permite comprar y vender criptodivisas de manera ficticia 
+                CryptoSim te permite comprar y vender criptodivisas de manera ficticia
             </p>
             <p>
                 En base a las transacciones realizadas se calcula un balance que muestra
-                lo que hubieses ganado o perdido realmente, teniendo en cuenta el precio actualizado de las 
+                lo que hubieses ganado o perdido realmente, teniendo en cuenta el precio actualizado de las
                 monedas intercambiadas según varios exchanges
             </p>
         </div>
@@ -27,17 +27,15 @@ export default {
     <div class="cotizaciones">
         <h2>Cotizaciones actuales</h2>
         <CoinInfoCard />
-        <a 
+        <a
             href="https://criptoya.com"
             class="link-fuente"
             target="_blank"
         >
             <small>Fuente: CriptoYa</small>
         </a>
-        
-    </div>
 
-    
+    </div>
 </div>
 
 </template>

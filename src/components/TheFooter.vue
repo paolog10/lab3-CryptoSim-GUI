@@ -1,6 +1,6 @@
 <template>
 <footer>
-    <small>© 2022 TimbaSim</small>
+    <small>© 2022 CryptoSim</small>
     <p><a href="https://github.com/LBonino/lab3-crypto-exchange-gui" class="link" target="_blank">GitHub repo</a></p>
 </footer>
 </template>

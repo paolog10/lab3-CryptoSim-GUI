@@ -1,6 +1,6 @@
 <template>
 <h1>404</h1>
-<p>↖↖↖ TimbaSim queda por allá ↗↗↗</p>
+<p>↖↖↖ CryptoSim queda por allá ↗↗↗</p>
 </template>
 
 <style scoped>

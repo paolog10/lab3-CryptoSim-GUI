@@ -39,22 +39,22 @@ export default {
 
 <template>
 <div class="login-view">
-    <h1>Iniciar sesión en TimbaSim</h1>
+    <h1>Iniciar sesión en CryptoSim</h1>
 
     <form @submit.prevent="intentarLogin">
         <label class="text-form-control">
             Nombre de usuario
             <small>Alfanumérico de 4 a 20 caracteres</small>
-            <input 
+            <input
                 type="text"
                 v-model="usernameIngresado"
             >
             <div class="username-feedback">
-                <!-- 
+                <!--
                     No se muestra ningún mensaje de error inicialmente porque por defecto
                     usernameIngresado === null
                 -->
-                <small 
+                <small
                     v-if="usernameIngresado !== null || loginFallido"
                     :class="{'valid-username': esUsernameValido, 'invalid-username': !esUsernameValido}"
                 >
@@ -65,14 +65,14 @@ export default {
 
         <label class="checkbox-form-control">
             Mantener sesión abierta
-            <input 
+            <input
                 type="checkbox"
                 v-model="mantenerSesionAbierta"
             >
         </label>
 
-        <button 
-            class="login-button" 
+        <button
+            class="login-button"
             type="submit"
         >
             Iniciar sesión
@@ -159,7 +159,6 @@ form, input, .login-button {
 .username-feedback {
     display: flex;
     align-items: center;
-    
     height: 1rem;
     padding-top: 0.2rem;
 }
