@@ -2,16 +2,26 @@
 import { mapActions, mapState, mapWritableState } from "pinia"
 import { useCoinDataStore } from "../stores/coinDataStore"
 import { useUserStore } from "../stores/userStore"
+import { obtenerFechaActual } from "../helpers/fechaActual"
+import { useTransactionInputs } from "../composables/transactionInputs"
 
 export default {
+    setup() {
+        return {
+            ...useTransactionInputs()
+        }
+    },
+
     data() {
         return {
-            tipoDeOperacion: "purchase",
-            monedaSeleccionada: useCoinDataStore().monedasAceptadas[0],
-            cantidadMoneda: null,
-            monto: null,
-            fechaSeleccionada: null,
-            transaccionInvalida: false,
+            inputsDefault: {
+                tipoDeOperacion: "purchase",
+                monedaSeleccionada: useCoinDataStore().monedasAceptadas[0],
+                cantidadMoneda: null,
+                monto: null,
+                fechaSeleccionada: null,
+                transaccionInvalida: false,
+            },
         }
     },
 
@@ -20,43 +30,20 @@ export default {
         ...mapState(useUserStore, ["username", "historialTransacciones", "cartera"]),
         ...mapWritableState(useUserStore, ["estadoTransaccionRegistrandose"]),
 
-        esCantidadMonedaValida() {
-            if (this.tipoDeOperacion === "purchase") {
-                return this.cantidadMoneda > 0
-            }
-
-            return this.cantidadMoneda > 0
-                && this.cantidadMoneda <= this.cartera[this.monedaSeleccionada]?.cantidad
-
-        },
-
-        // Los montos se expresarán solo en pesos, sin centavos
-        esMontoValido() {
-            return this.monto > 0
-                && Number.isInteger(this.monto)
-        },
-
-        esFechaValida() {
-            return this.fechaSeleccionada !== ""
-                && this.fechaSeleccionada <= this.obtenerFechaActual()
-        },
+        ventaInvalida() {
+            return this.tipoDeOperacion === "sale"
+                && this.cantidadMoneda > this.cartera[this.monedaSeleccionada].cantidad
+        }
     },
 
     methods: {
         ...mapActions(useUserStore, ["registrarTransaccion"]),
-
-        obtenerFechaActual() {
-            const fechaUTC = new Date()
-                .toISOString()
-                .replace(/:[0-9]{2}\..*/g, "")
-
-            return fechaUTC
-                .replace(/(?<=T)(.*)(?=:)/, fechaUTC.match(/(?<=T)(.*)(?=:)/)[0] - 3)
-        },
+        obtenerFechaActual,
 
         async intentarTransaccion() {
             if (
                 !this.esCantidadMonedaValida
+                || this.ventaInvalida
                 || !this.esMontoValido
                 || !this.esFechaValida
             ) {
@@ -73,22 +60,13 @@ export default {
                 "datetime": this.fechaSeleccionada.replace("T", " "),
             })
 
-            this.reiniciarFormulario()
+            this.setInputs(this.inputsDefault)
         },
-
-        // PENDIENTE: Averiguar si se puede refactorizar esto
-        reiniciarFormulario() {
-            this.tipoDeOperacion = "purchase"
-            this.monedaSeleccionada = useCoinDataStore().monedasAceptadas[0]
-            this.cantidadMoneda = null
-            this.monto = null
-            this.fechaSeleccionada = null
-            this.transaccionInvalida = false
-        }
     },
 
     mounted() {
         this.estadoTransaccionRegistrandose = null
+        this.setInputs(this.inputsDefault)
     },
 }
 </script>
@@ -144,16 +122,8 @@ export default {
                             || (!esCantidadMonedaValida && transaccionInvalida)
                         "
                     >
-                        <template v-if="tipoDeOperacion === 'purchase'">
+                        <template v-if="!esCantidadMonedaValida">
                             Debe ser mayor a 0
-                        </template>
-
-                        <template v-else-if="tipoDeOperacion === 'sale' && !(cartera[this.monedaSeleccionada]?.cantidad > 0)">
-                            No posee {{ monedaSeleccionada.toUpperCase() }} para vender
-                        </template>
-
-                        <template v-else>
-                            Debe estar en el rango 0 &lt x ≤ {{ cartera[this.monedaSeleccionada].cantidad }}
                         </template>
                     </small>
                 </div>
@@ -221,6 +191,9 @@ export default {
             class="failure"
         >
             Error: transacción rechazada
+        </p>
+        <p v-else-if="ventaInvalida">
+            No se puede vender más de lo que se tiene en la cartera
         </p>
     </div>
 </div>
