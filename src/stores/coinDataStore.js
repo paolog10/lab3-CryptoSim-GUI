@@ -15,7 +15,7 @@ export const useCoinDataStore = defineStore("coinData", {
             "ada",
         ],
 
-        /* 
+        /*
         ** Cada propiedad es el nombre "normalizado" del exchange, es el que se
         ** usa para hacer llamadas a la api y también para identificar a cada exchange
         ** en el objeto 'cotizaciones'.
@@ -39,11 +39,13 @@ export const useCoinDataStore = defineStore("coinData", {
             },
         },
 
-        cotizaciones: {},
+        cotizaciones: null,
     }),
 
     actions: {
         async actualizarCotizaciones() {
+            this.cotizaciones = {}
+
             for (const moneda of this.monedasAceptadas) {
                 const respuesta = await axios.get(`https://criptoya.com/api/${moneda}/ars`)
                 const cotizacionesObtenidas = await respuesta.data

@@ -131,6 +131,20 @@ export const useUserStore = defineStore('user', {
             this.estadoTransaccionRegistrandose = null
             this.estadoTransaccionEditandose = null
             this.estadoTransaccionEliminandose = null
+        },
+
+        valorizarCartera(cotizaciones) {
+            for (const moneda in this.cartera) {
+                // Se usa el primer exchange que se encuentre para la moneda
+                // Podría mejorarse para usar el exchange mejor cotizado
+                const nombreExchange = Object.keys(cotizaciones[moneda])[0]
+                const cotizacion = Math.round(cotizaciones[moneda][nombreExchange].totalBid)
+
+                this.cartera[moneda].valor = this.cartera[moneda].cantidad * cotizacion
+                this.cartera[moneda].exchangeConsultado = nombreExchange
+            }
+
+            return this.cartera
         }
     }
 })
