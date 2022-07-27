@@ -10,6 +10,7 @@ import IconDelete from "../components/icons/IconDelete.vue"
 import IconCheck from "../components/icons/IconCheck.vue"
 import IconCancel from "../components/icons/IconCancel.vue"
 import CargandoCartel from "../components/CargandoCartel.vue"
+import AvisoHistoralVacio from "../components/AvisoHistoralVacio.vue"
 
 export default {
     setup() {
@@ -112,6 +113,7 @@ export default {
         IconCheck,
         IconCancel,
         CargandoCartel,
+        AvisoHistoralVacio,
     },
 
     mounted() {
@@ -123,13 +125,7 @@ export default {
 <template>
 <div class="movimientos-view">
     <CargandoCartel v-if="!historialTransacciones"/>
-    <div
-        v-else-if="historialTransacciones.length === 0"
-        class="historial-vacio"
-    >
-        <p>No tenés transacciones registradas</p>
-        <p>Realiza una en la pestaña "Tradear" para poder utilizar esta función</p>
-    </div>
+    <AvisoHistoralVacio v-else-if="historialTransacciones.length === 0"/>
 
     <template v-else>
         <div class="eliminar-feedback">
@@ -297,17 +293,6 @@ export default {
 <style scoped>
 * {
     font-family: 'Montserrat', sans-serif;
-}
-
-.historial-vacio {
-    font-size: 2rem;
-    text-align: center;
-    position: absolute;
-    top: 40vh;
-}
-
-.historial-vacio p {
-    margin: 1rem 0;
 }
 
 .movimientos-view {
