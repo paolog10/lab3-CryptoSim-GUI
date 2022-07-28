@@ -12,8 +12,7 @@ export default {
     },
 
     computed: {
-        ...mapState(useUserStore, ["historialTransacciones", "username"]),
-        ...mapState(useCoinDataStore, ["cotizaciones"]),
+        ...mapState(useUserStore, ["username"]),
     },
 
     methods: {
@@ -65,5 +64,4 @@ main {
     background-color: #eee;
     flex: 1;
 }
-
 </style>

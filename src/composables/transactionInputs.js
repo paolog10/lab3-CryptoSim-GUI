@@ -1,5 +1,4 @@
 import { ref, computed } from "vue"
-import { useCoinDataStore } from "../stores/coinDataStore"
 import { useUserStore } from "../stores/userStore"
 import { obtenerFechaActual } from "../helpers/fechaActual"
 

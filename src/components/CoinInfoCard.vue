@@ -16,7 +16,6 @@ export default {
     },
 
     methods: {
-        ...mapActions(useCoinDataStore, ["actualizarCotizaciones"]),
         obtenerMontoFormateado,
     },
 }
