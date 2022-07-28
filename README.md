@@ -10,7 +10,6 @@ Este proyecto consta de una página web que permite al usuario simular la compra
 - Framework: Vue.js
 - Gestión de estados: Pinia
 - Routing: Vue Router
-- Test unitarios: Vitest
 
 ## Configuración de IDE recomendada por Vue
 
@@ -36,10 +35,4 @@ npm run dev
 
 ```sh
 npm run build
-```
-
-### Ejecutar test unitarios con [Vitest](https://vitest.dev/)
-
-```sh
-npm run test:unit
 ```
