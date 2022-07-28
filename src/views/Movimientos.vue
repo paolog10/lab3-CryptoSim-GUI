@@ -173,12 +173,19 @@ export default {
                 >
                     <td class="opciones-transaccion">
                         <button
-                            :disabled="estadoTransaccionEliminandose === 'procesando'"
+                            :disabled="
+                                [estadoTransaccionEliminandose, estadoTransaccionEditandose]
+                                    .includes('procesando')
+                            "
                             @click="intentarEliminarTransaccion(transaccion)"
                         >
                             <IconDelete/>
                         </button>
                         <button
+                            :disabled="
+                                [estadoTransaccionEliminandose, estadoTransaccionEditandose]
+                                    .includes('procesando')
+                            "
                             @click="permitirEditar(transaccion)"
                         >
                             <IconEdit/>
@@ -275,10 +282,22 @@ export default {
                             </div>
                         </td>
                         <td class="confirmar-edicion">
-                            <button @click="intentarEditarTransaccion(transaccionEditada)">
+                            <button
+                                :disabled="
+                                    [estadoTransaccionEliminandose, estadoTransaccionEditandose]
+                                        .includes('procesando')
+                                "
+                                @click="intentarEditarTransaccion(transaccionEditada)"
+                            >
                                 <IconCheck/>
                             </button>
-                            <button @click="cancelarEditar">
+                            <button
+                                :disabled="
+                                    [estadoTransaccionEliminandose, estadoTransaccionEditandose]
+                                        .includes('procesando')
+                                "
+                                @click="cancelarEditar"
+                            >
                                 <IconCancel/>
                             </button>
                          </td>
