@@ -50,7 +50,14 @@ export default {
 
         ordenarHistorialPorFecha() {
             return this.historialTransacciones.sort(
-                (a, b) => a["_id"].localeCompare(b["_id"]) * -1
+                (a, b) => {
+                    // "Desempatar" con el id si las fechas son iguales
+                    if (a["datetime"] === b["datetime"]) {
+                        return b["_id"].localeCompare(a["_id"])
+                    }
+
+                    return b["datetime"].localeCompare(a["datetime"])
+                }
             )
         },
 
