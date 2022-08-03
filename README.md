@@ -1,4 +1,4 @@
-# lab3-crypto-exchange-gui
+# lab3-CryptoSim-GUI
 
 Consigna del trabajo práctico [aquí](https://docs.google.com/document/d/1-GoGeBKLTa79gpkWHA5HM0OUmaFpOXic-kwy23VWDZ0/edit#heading=h.ux7evv327yxt)
 
