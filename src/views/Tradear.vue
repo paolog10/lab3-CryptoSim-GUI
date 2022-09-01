@@ -31,8 +31,13 @@ export default {
         ...mapWritableState(useUserStore, ["estadoTransaccionRegistrandose"]),
 
         ventaInvalida() {
+            let cantidadMonedaEnPosesion = this.cartera[this.monedaSeleccionada]?.cantidad
+            cantidadMonedaEnPosesion = cantidadMonedaEnPosesion === undefined
+                ? 0
+                : cantidadMonedaEnPosesion
+
             return this.tipoDeOperacion === "sale"
-                && this.cantidadMoneda > this.cartera[this.monedaSeleccionada].cantidad
+                && this.cantidadMoneda > cantidadMonedaEnPosesion
         }
     },
 
