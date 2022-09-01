@@ -402,6 +402,7 @@ button {
     padding: unset;
     margin-right: 5px;
     cursor: pointer;
+    background-color: transparent;
 }
 
 button:hover {
