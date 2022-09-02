@@ -87,7 +87,7 @@ export default {
     <template v-else>
         <form novalidate @submit.prevent="intentarTransaccion">
             <fieldset :disabled="estadoTransaccionRegistrandose === 'procesando'">
-                <label class="control-without-feedback">
+                <label class="control-with-feedback">
                     <span class="label-text">Tipo de operación</span>
                     <select
                         name="operaciones"
@@ -96,6 +96,17 @@ export default {
                         <option value="purchase">Compra</option>
                         <option value="sale">Venta</option>
                     </select>
+
+                    <div class="input-feedback">
+                        <small
+                            v-if="
+                                tipoDeOperacion === 'sale'
+                                && !cartera[monedaSeleccionada]
+                            "
+                        >
+                            No posee {{ monedaSeleccionada.toUpperCase() }} para vender
+                        </small>
+                    </div>
                 </label>
 
                 <label class="control-without-feedback">
@@ -128,9 +139,16 @@ export default {
                                 || (!esCantidadMonedaValida && transaccionInvalida)
                             "
                         >
-                            <template v-if="!esCantidadMonedaValida">
-                                Debe ser mayor a 0
-                            </template>
+                            Debe ser mayor a 0
+                        </small>
+
+                        <small
+                            v-if="
+                                tipoDeOperacion === 'sale'
+                                && (cantidadMoneda > (cartera[monedaSeleccionada]?.cantidad ?? 0))
+                            "
+                        >
+                            Debe ser menor o igual a lo que posee
                         </small>
                     </div>
                 </label>
@@ -197,9 +215,6 @@ export default {
                 class="failure"
             >
                 Error: transacción rechazada
-            </p>
-            <p v-else-if="ventaInvalida">
-                No se puede vender más de lo que se tiene en la cartera
             </p>
         </div>
     </template>
