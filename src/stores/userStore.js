@@ -94,6 +94,16 @@ export const useUserStore = defineStore('user', {
                         .toNumber()
                 }
             }
+
+            /*
+            Ya que se agregan las monedas al objeto cartera a medida que se compran,
+            estas también se eliminan de la cartera si la cantidad se reduce a 0
+            */
+            for (const moneda in this.cartera) {
+                if (this.cartera[moneda].cantidad === 0) {
+                    delete this.cartera[moneda]
+                }
+            }
         },
 
         async eliminarTransaccion(transaccion) {
