@@ -22,7 +22,7 @@ export default {
     data() {
         return {
             intentoEliminarTransaccionInvalido: false,
-            idTransaccionSiendoEditada: null,
+            transaccionSeleccionada: null,
         }
     },
 
@@ -33,7 +33,7 @@ export default {
 
         transaccionEditada() {
             return {
-                "_id": this.idTransaccionSiendoEditada,
+                "_id": this.transaccionSeleccionada["_id"],
                 "action": this.tipoDeOperacion,
                 "crypto_code": this.monedaSeleccionada,
                 "crypto_amount": this.cantidadMoneda,
@@ -64,7 +64,7 @@ export default {
         sePuedeEliminarTransaccion(transaccion) {
             if (
                 transaccion["action"] === "purchase"
-                && (this.cartera[transaccion["crypto_code"]].cantidad - transaccion["crypto_amount"]) < 0
+                && ((this.cartera[transaccion["crypto_code"]]?.cantidad ?? 0) - transaccion["crypto_amount"]) < 0
             ) {
                 return false
             }
@@ -72,15 +72,16 @@ export default {
             return true
         },
 
-        intentarEliminarTransaccion(transaccion) {
+        intentarEliminarTransaccion() {
             this.reiniciarEstados()
 
-            if (!this.sePuedeEliminarTransaccion(transaccion)) {
+            if (!this.sePuedeEliminarTransaccion(this.transaccionSeleccionada)) {
                 return this.intentoEliminarTransaccionInvalido = true
             }
 
             this.intentoEliminarTransaccionInvalido = false
-            this.eliminarTransaccion(transaccion)
+            this.eliminarTransaccion(this.transaccionSeleccionada)
+            this.deseleccionarTransaccion()
         },
 
         intentarEditarTransaccion(transaccionEditada) {
@@ -95,22 +96,32 @@ export default {
             }
 
             this.editarTransaccion(transaccionEditada)
+            this.deseleccionarTransaccion()
         },
 
-        permitirEditar(transaccion) {
-            this.idTransaccionSiendoEditada = transaccion['_id']
+        seleccionarTransaccion(transaccion) {
+            if (this.transaccionSeleccionada === transaccion) {
+                return
+            }
+            this.transaccionSeleccionada = transaccion
+            this.transaccionSeleccionada.editandose = false;
+
+        },
+
+        deseleccionarTransaccion() {
+            this.transaccionSeleccionada = null
+        },
+
+        permitirEditar() {
+            this.transaccionSeleccionada.editandose = true
             this.setInputs({
-                tipoDeOperacion: transaccion["action"],
-                monedaSeleccionada: transaccion["crypto_code"],
-                cantidadMoneda: transaccion["crypto_amount"],
-                monto: transaccion["money"],
-                fechaSeleccionada: transaccion["datetime"].substring(0, 16),
+                tipoDeOperacion: this.transaccionSeleccionada["action"],
+                monedaSeleccionada: this.transaccionSeleccionada["crypto_code"],
+                cantidadMoneda: this.transaccionSeleccionada["crypto_amount"],
+                monto: this.transaccionSeleccionada["money"],
+                fechaSeleccionada: this.transaccionSeleccionada["datetime"].substring(0, 16),
                 transaccionInvalida: false
             })
-        },
-
-        cancelarEditar() {
-            this.idTransaccionSiendoEditada = null
         },
     },
 
@@ -132,7 +143,7 @@ export default {
 <template>
 <div class="movimientos-view">
     <CargandoCartel v-if="!historialTransacciones"/>
-    <AvisoHistoralVacio v-else-if="historialTransacciones.length === 0"/>
+    <AvisoHistoralVacio class="historial-vacio" v-else-if="historialTransacciones.length === 0"/>
 
     <template v-else>
         <div class="eliminar-feedback">
@@ -158,160 +169,166 @@ export default {
                 Error: no se pudo editar la transacción
             </p>
         </div>
-        <table>
-            <thead>
-                <tr>
-                    <!--
-                      El th vacío es para la columna que contiene a los botones
-                      para eliminar o editar transacciones
-                    -->
-                    <th></th>
-                    <th>Fecha</th>
-                    <th>Operación</th>
-                    <th>Moneda</th>
-                    <th>Cantidad</th>
-                    <th>Monto</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr
-                    v-for="transaccion in ordenarHistorialPorFecha()"
+
+        <div class="movimientos-container">
+            <div
+                class="movimientos-menu"
+                :class="{
+                    visible: transaccionSeleccionada,
+                    disabled: [estadoTransaccionEliminandose, estadoTransaccionEditandose]
+                                .includes('procesando')
+                }"
+            >
+                <div class="menu-actions">
+                    <button @click="intentarEliminarTransaccion()">
+                        <IconDelete/>
+                    </button>
+
+                    <button @click="permitirEditar()">
+                        <IconEdit/>
+                    </button>
+                </div>
+
+                <div
+                    class="confirm-cancel"
+                    :class="{visible: transaccionSeleccionada?.editandose}"
                 >
-                    <td class="opciones-transaccion">
-                        <button
-                            :disabled="
-                                [estadoTransaccionEliminandose, estadoTransaccionEditandose]
-                                    .includes('procesando')
-                            "
-                            @click="intentarEliminarTransaccion(transaccion)"
-                        >
-                            <IconDelete/>
-                        </button>
-                        <button
-                            :disabled="
-                                [estadoTransaccionEliminandose, estadoTransaccionEditandose]
-                                    .includes('procesando')
-                            "
-                            @click="permitirEditar(transaccion)"
-                        >
-                            <IconEdit/>
-                        </button>
-                    </td>
+                    <button @click="intentarEditarTransaccion(transaccionEditada)">
+                        <IconCheck/>
+                    </button>
 
-                    <template v-if="transaccion['_id'] !== idTransaccionSiendoEditada">
-                        <td>
-                        {{ obtenerFechaFormateada(transaccion["datetime"]) }}
-                        </td>
-                        <td>
-                            {{
-                                transaccion["action"] === "purchase"
-                                ? "Compra"
-                                : "Venta"
-                            }}
-                        </td>
-                        <td>{{ transaccion["crypto_code"].toUpperCase() }}</td>
-                        <td>{{ transaccion["crypto_amount"] }}</td>
-                        <td>{{ obtenerMontoFormateado(transaccion["money"]) }}</td>
-                    </template>
+                    <button @click="deseleccionarTransaccion">
+                        <IconCancel/>
+                    </button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Operación</th>
+                        <th>Moneda</th>
+                        <th>Cantidad</th>
+                        <th>Monto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr
+                        v-for="transaccion in ordenarHistorialPorFecha()"
+                        class="transaccion-fila"
+                        :class="{
+                            'transaccion-seleccionada': transaccion === transaccionSeleccionada,
+                            disabled: [estadoTransaccionEliminandose, estadoTransaccionEditandose]
+                                    .includes('procesando')
+                        }"
+                        @click="seleccionarTransaccion(transaccion)"
 
-                    <template v-else>
-                        <td>
-                            <input
-                                type="datetime-local"
-                                v-model="fechaSeleccionada"
-                            >
-                            <div
-                                v-if="!esFechaValida"
-                                class="relative-container"
-                            >
-                                <div class="ingresado-feedback fecha-feedback">
-                                    Debe ser igual o previo a la fecha actual
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <select
-                                name="operaciones"
-                                v-model="tipoDeOperacion"
-                            >
-                                <option value="purchase">Compra</option>
-                                <option
-                                    value="sale"
-                                    :selected="transaccion['action'] === 'sale'"
+                    >
+                        <template
+                            v-if="
+                                transaccion['_id'] !== this.transaccionSeleccionada?.['_id']
+                                || transaccion['_id'] === this.transaccionSeleccionada?.['_id']
+                                && !this.transaccionSeleccionada.editandose
+                            "
+                        >
+                            <td>
+                            {{ obtenerFechaFormateada(transaccion["datetime"]) }}
+                            </td>
+                            <td>
+                                {{
+                                    transaccion["action"] === "purchase"
+                                    ? "Compra"
+                                    : "Venta"
+                                }}
+                            </td>
+                            <td>{{ transaccion["crypto_code"].toUpperCase() }}</td>
+                            <td>{{ transaccion["crypto_amount"] }}</td>
+                            <td>{{ obtenerMontoFormateado(transaccion["money"]) }}</td>
+                        </template>
+
+                        <template v-else>
+
+                            <!--PENDIENTE: validar cantidad al vender-->
+                            <td>
+                                <input
+                                    class="input-fecha"
+                                    type="datetime-local"
+                                    v-model="fechaSeleccionada"
                                 >
-                                    Venta
-                                </option>
-                            </select>
-                        </td>
-                        <td>
-                            <select
-                                name="coins"
-                                v-model="monedaSeleccionada"
-                            >
-                                <option
-                                    v-for="moneda in monedasAceptadas"
-                                    :value="moneda"
-                                    :selected="transaccion['crypto_code'] === moneda"
+                                <div
+                                    v-if="!esFechaValida"
+                                    class="relative-container"
                                 >
-                                    {{ moneda.toUpperCase() }}
-                                </option>
-                            </select>
-                        </td>
-                        <td>
-                            <input
-                                type="number"
-                                step="any"
-                                v-model="cantidadMoneda"
-                            >
-                            <div
-                                v-if="!esCantidadMonedaValida"
-                                class="relative-container"
-                            >
-                                <div class="ingresado-feedback cantidad-feedback">
-                                    Debe ser mayor a 0
+                                    <div class="ingresado-feedback fecha-feedback">
+                                        Debe ser igual o previo a la fecha actual
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
-                        <td class="container-input-monto">
-                            <span class="signo-monto">$</span>
-                            <input
-                                type="number"
-                                v-model="monto"
-                            >
-                            <div
-                                v-if="!esMontoValido"
-                                class="relative-container"
-                            >
-                                <div class="ingresado-feedback monto-feedback">
-                                    Debe ser un entero mayor a 0
+                            </td>
+                            <td>
+                                <select
+                                    name="operaciones"
+                                    v-model="tipoDeOperacion"
+                                >
+                                    <option value="purchase">Compra</option>
+                                    <option
+                                        value="sale"
+                                        :selected="transaccion['action'] === 'sale'"
+                                    >
+                                        Venta
+                                    </option>
+                                </select>
+                            </td>
+                            <td>
+                                <select
+                                    name="coins"
+                                    v-model="monedaSeleccionada"
+                                >
+                                    <option
+                                        v-for="moneda in monedasAceptadas"
+                                        :value="moneda"
+                                        :selected="transaccion['crypto_code'] === moneda"
+                                    >
+                                        {{ moneda.toUpperCase() }}
+                                    </option>
+                                </select>
+                            </td>
+                            <td>
+                                <input
+                                    class="input-numero"
+                                    type="number"
+                                    step="any"
+                                    v-model="cantidadMoneda"
+                                >
+                                <div
+                                    v-if="!esCantidadMonedaValida"
+                                    class="relative-container"
+                                >
+                                    <div class="ingresado-feedback cantidad-feedback">
+                                        Debe ser mayor a 0
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
-                        <td class="confirmar-edicion">
-                            <button
-                                :disabled="
-                                    [estadoTransaccionEliminandose, estadoTransaccionEditandose]
-                                        .includes('procesando')
-                                "
-                                @click="intentarEditarTransaccion(transaccionEditada)"
-                            >
-                                <IconCheck/>
-                            </button>
-                            <button
-                                :disabled="
-                                    [estadoTransaccionEliminandose, estadoTransaccionEditandose]
-                                        .includes('procesando')
-                                "
-                                @click="cancelarEditar"
-                            >
-                                <IconCancel/>
-                            </button>
-                         </td>
-                    </template>
-                </tr>
-            </tbody>
-        </table>
+                            </td>
+                            <td>
+                                <span class="signo-monto">$</span>
+                                <input
+                                    class="input-numero"
+                                    type="number"
+                                    v-model="monto"
+                                >
+                                <div
+                                    v-if="!esMontoValido"
+                                    class="relative-container"
+                                >
+                                    <div class="ingresado-feedback monto-feedback">
+                                        Debe ser un entero mayor a 0
+                                    </div>
+                                </div>
+                            </td>
+                        </template>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </template>
 </div>
 </template>
@@ -329,17 +346,33 @@ export default {
     align-items: center;
 }
 
+.movimientos-container {
+    width: 70%;
+}
+
+.movimientos-menu {
+    display: flex;
+    visibility: hidden;
+    justify-content: space-between;
+    padding: 0 1%;
+}
+
+.confirm-cancel {
+    visibility: hidden;
+}
+
+.visible {
+    visibility: visible;
+}
+
 table {
     table-layout: fixed;
     border-collapse: collapse;
     text-align: center;
-    font-family: 'Montserrat';
     font-size: 1.2rem;
-    width: 80%;
-    background-color: inherit;
-    margin-bottom: 2.5rem;
-    right: 2.5rem;
-    position: relative;
+    width: 100%;
+    border-left: solid 1px #333;
+    border-right: solid 1px #333;
 }
 
 th {
@@ -352,45 +385,8 @@ th, td {
     padding: 0.4rem 0;
 }
 
-thead th:nth-child(2), tbody td:nth-child(2) {
-    border-left: 1px solid #333;
-}
-
-thead th:nth-child(6), tbody td:nth-child(6) {
-    border-right: 1px solid #333;
-}
-
-thead th:nth-child(2) {
-    width: 20%;
-}
-
-thead th:nth-child(3) {
-    width: 18%;
-}
-
-thead th:nth-child(4) {
-    width: 16%;
-}
-
-thead th:nth-child(1), thead th:nth-child(7) {
-    width: 5rem;
-    border: unset;
-    background-color: #eee;
-}
-
-table tr:nth-child(odd) td:not(.opciones-transaccion, .confirmar-edicion) {
+tbody tr:nth-child(odd) {
     background-color: #ffd7ac;
-}
-
-.opciones-transaccion {
-    visibility: hidden;
-    border: unset;
-    display: flex;
-    justify-content: center;
-}
-
-tr:hover > .opciones-transaccion {
-    visibility: visible;
 }
 
 .confirmar-edicion {
@@ -409,10 +405,12 @@ button:hover {
     stroke: #FF9C33;
 }
 
-button:disabled {
+.disabled {
     cursor: default;
     fill: gray;
     stroke: gray;
+    pointer-events: none;
+    color: gray;
 }
 
 .eliminar-feedback {
@@ -455,5 +453,52 @@ button:disabled {
 
 .monto-feedback {
     left: 3%;
+}
+
+.transaccion-fila:hover {
+    cursor: pointer;
+}
+
+.transaccion-fila:nth-child(odd):hover {
+    background-color: #fdc27d;
+}
+
+.transaccion-fila:nth-child(even):hover {
+    background-color: rgb(250, 250, 250);
+}
+
+.transaccion-seleccionada {
+    font-weight: bold;
+}
+
+.historial-vacio {
+    position: absolute;
+    top: 40%;
+}
+
+.input-numero {
+    width: 60%;
+}
+
+@media (max-width: 1100px) {
+    .movimientos-container {
+        width: 95%;
+    }
+
+    table {
+        font-size: 0.9rem;
+    }
+}
+
+@media (min-width: 500px) and (max-width: 615px) {
+    table {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 499px) {
+    table {
+        font-size: 0.5rem;
+    }
 }
 </style>

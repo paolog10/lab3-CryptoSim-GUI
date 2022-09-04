@@ -98,7 +98,8 @@ export default {
 
 h1 {
     margin: 0;
-    color: #222
+    color: #222;
+    text-align: center;
 }
 
 form {

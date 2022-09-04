@@ -117,10 +117,11 @@ tbody tr:nth-child(odd) {
 }
 
 .cartera-vacia {
-    font-size: 2rem;
+    font-size: 1.8rem;
     text-align: center;
+    padding: 0 1rem;
     position: absolute;
-    top: 40vh;
+    top: 40%;
 }
 
 .cartera-vacia p {
@@ -134,5 +135,12 @@ a {
 
 a:hover {
     text-decoration: underline;
+}
+
+@media (max-width: 700px) {
+    table {
+        width: 75%;
+        font-size: 0.8rem;
+    }
 }
 </style>

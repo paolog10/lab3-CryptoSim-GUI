@@ -77,6 +77,13 @@ export default {
         </tbody>
     </table>
 </div>
+<a
+            href="https://criptoya.com"
+            class="link-fuente"
+            target="_blank"
+        >
+            <small>Fuente: CriptoYa</small>
+        </a>
 </template>
 
 <style scoped>
@@ -92,12 +99,12 @@ table {
     text-align: center;
     font-family: 'Montserrat';
     font-size: 1.2rem;
-    width: 33rem;
+    width: 28em;
 }
 
 th, td {
     border-bottom: 1px solid #333;
-    padding: 0.5rem 2rem;
+    padding: 0.5em 2em;
 }
 
 tr:last-child td {
@@ -119,5 +126,31 @@ a {
 
 a:hover {
     text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+    .coin-info-card {
+        width: 95%;
+    }
+    table {
+        font-size: 0.9rem;
+        width: 100%;
+    }
+}
+
+.link-fuente {
+    align-self: flex-end;
+    margin-top: 0.2rem;
+    margin-right: 1rem;
+    color: #222;
+    text-decoration: none;
+    user-select: none;
+}
+
+.link-fuente:hover {
+    text-decoration: underline;
+    text-decoration-color: #ffa94e;
+    text-decoration-thickness: 0.2rem;
+    color: black;
 }
 </style>

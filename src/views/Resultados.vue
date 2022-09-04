@@ -116,7 +116,7 @@ table {
     border-collapse: collapse;
     text-align: center;
     font-size: 1.2rem;
-    width: 50%;
+    width: 40%;
     border-left: solid 1px #333;
     border-right: solid 1px #333;
 }
@@ -133,5 +133,17 @@ th, td {
 
 tbody tr:nth-child(odd) {
     background-color: #ffd7ac;
+}
+
+
+.historial-vacio {
+    position: absolute;
+    top: 40%;
+}
+
+@media (max-width: 700px) {
+    table {
+        width: 75%;
+    }
 }
 </style>

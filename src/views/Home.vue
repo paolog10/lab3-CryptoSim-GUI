@@ -27,14 +27,6 @@ export default {
     <div class="cotizaciones">
         <h2>Cotizaciones actuales</h2>
         <CoinInfoCard />
-        <a
-            href="https://criptoya.com"
-            class="link-fuente"
-            target="_blank"
-        >
-            <small>Fuente: CriptoYa</small>
-        </a>
-
     </div>
 </div>
 
@@ -47,6 +39,7 @@ export default {
     align-items: center;
     flex: 1;
     font-family: 'Montserrat', sans-serif;
+    padding: 0 2%;
 }
 
 .home-intro {
@@ -67,7 +60,7 @@ p {
     width: 48%;
     text-align: center;
     line-height: 1.3rem;
-    margin: 0.3rem auto;
+    margin: 1rem auto;
 }
 
 .cotizaciones {
@@ -94,5 +87,20 @@ p {
     text-decoration-color: #ffa94e;
     text-decoration-thickness: 0.2rem;
     color: black;
+}
+
+@media (max-width: 415px) {
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    .home-intro {
+        margin: 2rem 0;
+    }
+
+    p {
+        width: 100%;
+        line-height: 1.3rem;
+    }
 }
 </style>
