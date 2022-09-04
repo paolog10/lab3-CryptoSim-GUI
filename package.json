@@ -5,11 +5,13 @@
     "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview --port 4173",
+    "deploy": "cd dist && cp index.html 404.html && cd .. && gh-pages -d dist",
     "test:unit": "vitest --environment jsdom"
   },
   "dependencies": {
     "axios": "^0.27.2",
     "decimal.js": "^10.3.1",
+    "gh-pages": "^4.0.0",
     "pinia": "^2.0.14",
     "vue": "^3.2.37",
     "vue-router": "^4.0.16"
