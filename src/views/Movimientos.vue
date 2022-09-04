@@ -173,11 +173,7 @@ export default {
         <div class="movimientos-container">
             <div
                 class="movimientos-menu"
-                :class="{
-                    visible: transaccionSeleccionada,
-                    disabled: [estadoTransaccionEliminandose, estadoTransaccionEditandose]
-                                .includes('procesando')
-                }"
+                :class="{ visible: transaccionSeleccionada }"
             >
                 <div class="menu-actions">
                     <button @click="intentarEliminarTransaccion()">
