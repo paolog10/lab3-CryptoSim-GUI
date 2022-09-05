@@ -5,7 +5,7 @@
     "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview --port 4173",
-    "deploy": "cd dist && cp index.html 404.html && cd .. && gh-pages -d dist",
+    "deploy": "gh-pages -d dist",
     "test:unit": "vitest --environment jsdom"
   },
   "dependencies": {
